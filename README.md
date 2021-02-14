@@ -1,3 +1,11 @@
+## stockfish-nnue.wasm
+
+WebAssembly port of [Stockfish](https://github.com/official-stockfish/Stockfish) with NNUE support, currently used by [lichess.org](https://lichess.org/blog/YDOKRxQAACgAREB3/stockfish-13-nnue-on-lichess) for client-side analysis.
+
+For development, see [`src/emscripten/README.md`](src/emscripten/README.md).
+
+The original `README.md` follows below.
+
 ## Overview
 
 [![Build Status](https://github.com/official-stockfish/Stockfish/actions/workflows/stockfish.yml/badge.svg)](https://github.com/official-stockfish/Stockfish/actions)
