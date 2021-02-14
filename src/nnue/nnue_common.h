@@ -41,6 +41,10 @@
 
 #elif defined(USE_NEON)
 #include <arm_neon.h>
+
+#elif defined(USE_WASM_SIMD)
+#include "../emscripten/wasm_simd.h"
+
 #endif
 
 namespace Stockfish::Eval::NNUE {
@@ -66,6 +70,9 @@ namespace Stockfish::Eval::NNUE {
   constexpr std::size_t SimdWidth = 8;
 
   #elif defined(USE_NEON)
+  constexpr std::size_t SimdWidth = 16;
+
+  #elif defined(USE_WASM_SIMD)
   constexpr std::size_t SimdWidth = 16;
   #endif
 

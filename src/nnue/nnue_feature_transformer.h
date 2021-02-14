@@ -112,6 +112,22 @@ namespace Stockfish::Eval::NNUE {
   static constexpr IndexType NumRegs = 16;
   static constexpr IndexType NumPsqtRegs = 2;
 
+  #elif USE_WASM_SIMD
+  typedef __i16x8 vec_t;
+  typedef __i32x4 psqt_vec_t;
+  #define vec_load(a) wasm_v128_load(a)
+  #define vec_store(a,b) wasm_v128_store(a, b)
+  #define vec_add_16(a,b) wasm_i16x8_add(a,b)
+  #define vec_sub_16(a,b) wasm_i16x8_sub(a,b)
+  #define vec_load_psqt(a) wasm_v128_load(a)
+  #define vec_store_psqt(a,b) wasm_v128_store(a, b)
+  #define vec_add_psqt_32(a,b) wasm_i32x4_add(a,b)
+  #define vec_sub_psqt_32(a,b) wasm_i32x4_sub(a,b)
+  #define vec_zero_psqt() wasm_i32x4_splat(0)
+  // TODO: investigate how this affects performance
+  static constexpr IndexType NumRegs = 8;
+  static constexpr IndexType NumPsqtRegs = 2;
+
   #else
   #undef VECTOR
 
@@ -152,12 +168,24 @@ namespace Stockfish::Eval::NNUE {
 
     // Read network parameters
     bool read_parameters(std::istream& stream) {
+      #ifdef __EMSCRIPTEN__
+      // NOTE: This turns out to be the bottleneck of startup.
+      constexpr int n = HalfDimensions;
+      constexpr int m = InputDimensions;
+      stream.read(reinterpret_cast<char*>(biases), n * sizeof(biases[0]));
+      stream.read(reinterpret_cast<char*>(weights), n * m * sizeof(weights[0]));
+      stream.read(reinterpret_cast<char*>(psqtWeights), PSQTBuckets * InputDimensions * sizeof(psqtWeights[0]));
+
+      #else
       for (std::size_t i = 0; i < HalfDimensions; ++i)
         biases[i] = read_little_endian<BiasType>(stream);
       for (std::size_t i = 0; i < HalfDimensions * InputDimensions; ++i)
         weights[i] = read_little_endian<WeightType>(stream);
       for (std::size_t i = 0; i < PSQTBuckets * InputDimensions; ++i)
         psqtWeights[i] = read_little_endian<PSQTWeightType>(stream);
+
+      #endif
+
       return !stream.fail();
     }
 
@@ -218,6 +246,22 @@ namespace Stockfish::Eval::NNUE {
 
       for (IndexType p = 0; p < 2; ++p) {
         const IndexType offset = HalfDimensions * p;
+
+  #if defined(USE_WASM_SIMD)
+        {
+          const __i16x8 kLow = wasm_i16x8_splat(0);
+          const __i16x8 kHigh = wasm_i16x8_splat(127);
+          for (IndexType j = 0; j < HalfDimensions; j += 2 * 8) {
+            __i16x8 x = wasm_v128_load(&accumulation[static_cast<int>(perspectives[p])][j + 0 * 8]);
+            __i16x8 y = wasm_v128_load(&accumulation[static_cast<int>(perspectives[p])][j + 1 * 8]);
+            x = wasm_i16x8_min(wasm_i16x8_max(x, kLow), kHigh);
+            y = wasm_i16x8_min(wasm_i16x8_max(y, kLow), kHigh);
+            __u8x16 z = wasm_u8x16_narrow_i16x8(x, y);
+            wasm_v128_store(&output[offset + j], z);
+          }
+          continue;
+        }
+  #endif
 
   #if defined(USE_AVX512)
         auto out = reinterpret_cast<__m512i*>(&output[offset]);
