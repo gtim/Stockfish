@@ -8,7 +8,7 @@ jobs:
       - uses: actions/setup-python@v2
       - uses: mymindstorm/setup-emsdk@v8
         with:
-          version: 2.0.11
+          version: 2.0.26
           actions-cache-folder: 'emsdk-cache'
 
       - name: Build
@@ -17,19 +17,19 @@ jobs:
       - name: Install NodeJS
         uses: actions/setup-node@v2
         with:
-          node-version: 15
+          node-version: 16
 
       - name: Print NodeJS/V8 versions
         run: "node -e 'console.log(`node: ${process.version}\nv8: ${process.versions.v8}`)'"
 
       - name: Benchmark (classical)
         run: >
-          node --experimental-wasm-simd --experimental-wasm-threads --wasm-simd-post-mvp src/emscripten/public/uci.js
+          node --experimental-wasm-{simd,threads} src/emscripten/public/uci.js
           bench 16 1 25 current depth classical
 
       - name: Benchmark (NNUE)
         run: >
-          node --experimental-wasm-simd --experimental-wasm-threads --wasm-simd-post-mvp src/emscripten/public/uci.js
+          node --experimental-wasm-{simd,threads} src/emscripten/public/uci.js
           bench 16 1 25 current depth NNUE
 
   test:
@@ -39,7 +39,7 @@ jobs:
       - uses: actions/setup-python@v2
       - uses: mymindstorm/setup-emsdk@v8
         with:
-          version: 2.0.11
+          version: 2.0.26
           actions-cache-folder: 'emsdk-cache'
 
       - name: Build
@@ -48,7 +48,7 @@ jobs:
       - name: Install NodeJS
         uses: actions/setup-node@v2
         with:
-          node-version: 15
+          node-version: 16
 
       - name: Print NodeJS/V8 versions
         run: "node -e 'console.log(`node: ${process.version}\nv8: ${process.versions.v8}`)'"
@@ -57,5 +57,5 @@ jobs:
         run: >
           for (( i=0; i < 1000; i++ )); do
             echo "--- ${i} ---"
-            node --experimental-wasm-{simd,threads} --wasm-simd-post-mvp src/emscripten/public/uci.js bench 128 2 2 current depth NNUE || exit 1
+            node --experimental-wasm-{simd,threads} src/emscripten/public/uci.js bench 128 2 2 current depth NNUE || exit 1
           done

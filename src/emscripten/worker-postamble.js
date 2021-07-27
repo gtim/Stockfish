@@ -1,7 +1,7 @@
 //
 // Patch `onmessage` to support custom message
 //
-const old_onmessage = this.onmessage;
+const old_onmessage = self.onmessage;
 
 const new_onmessage = (e) => {
   if (e.data.cmd === 'custom') {
@@ -13,4 +13,4 @@ const new_onmessage = (e) => {
   }
 }
 
-onmessage = this.onmessage = new_onmessage;
+onmessage = self.onmessage = new_onmessage;

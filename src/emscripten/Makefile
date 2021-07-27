@@ -13,7 +13,8 @@ assertion = no
 
 VPATH := $(VPATH):emscripten
 SRCS += emscripten/embedded_nnue.cpp
-EM_FLAGS += \
+EM_CXXFLAGS +=
+EM_LDFLAGS += \
 	--pre-js emscripten/preamble.js \
 	-s MODULARIZE=1 -s EXPORT_NAME="Stockfish" -s ENVIRONMENT=web,worker,node \
 	-s STRICT=1 \
@@ -21,29 +22,31 @@ EM_FLAGS += \
 	-s USE_PTHREADS=1 \
 	-s PROXY_TO_PTHREAD=1 \
 	-s ALLOW_MEMORY_GROWTH=1 -s INITIAL_MEMORY=$$((1 << 27)) -s MAXIMUM_MEMORY=$$((1 << 31)) \
-	-s FILESYSTEM=0
+	-s FILESYSTEM=0 \
+	-s ALLOW_UNIMPLEMENTED_SYSCALLS
 
 ifeq ($(minify_js),yes)
-	EM_FLAGS += --closure 1
+	EM_LDFLAGS += --closure 1
 else
-	EM_FLAGS += --closure 0 --minify 0
+	EM_LDFLAGS += --closure 0 --minify 0
 endif
 
 ifeq ($(assertion),yes)
-	EM_FLAGS += -s ASSERTIONS=1
+	EM_LDFLAGS += -s ASSERTIONS=1
 else
-	EM_FLAGS += -s ASSERTIONS=0
+	EM_LDFLAGS += -s ASSERTIONS=0
 endif
 
 ifeq ($(wasm_simd_post_mvp),yes)
-	EM_FLAGS += -DUSE_WASM_SIMD -DUSE_WASM_SIMD_POST_MVP -msimd128
+	EM_CXXFLAGS += -DUSE_WASM_SIMD -DUSE_WASM_SIMD_POST_MVP -msimd128
 	SRCS += emscripten/wasm_simd.cpp
 else ifeq ($(wasm_simd),yes)
-	EM_FLAGS += -DUSE_WASM_SIMD -msimd128
+	EM_CXXFLAGS += -DUSE_WASM_SIMD -msimd128
 	SRCS += emscripten/wasm_simd.cpp
 endif
 
-EXTRACXXFLAGS += -DUSE_POPCNT $(EM_FLAGS)
+EXTRACXXFLAGS += -DUSE_POPCNT $(EM_CXXFLAGS)
+EXTRALDFLAGS += $(EM_LDFLAGS)
 
 emscripten/embedded_nnue.cpp: net
 	@echo "-- Generate embedded_nnue.cpp --"

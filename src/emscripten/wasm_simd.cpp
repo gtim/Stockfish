@@ -10,35 +10,34 @@ void affine(const int8_t A[m][n], const uint8_t x[n], const int32_t b[m], int32_
   // Dot product of two SIMD vectors
   //
   [[maybe_unused]] auto dot_i8x16 = [](__i8x16 a, __i8x16 b) -> __i32x4 {
-    __i16x8 a_lo = wasm_i16x8_widen_low_i8x16(a);
-    __i16x8 a_hi = wasm_i16x8_widen_high_i8x16(a);
-    __i16x8 b_lo = wasm_i16x8_widen_low_i8x16(b);
-    __i16x8 b_hi = wasm_i16x8_widen_high_i8x16(b);
+    __i16x8 a_lo = wasm_i16x8_extend_low_i8x16(a);
+    __i16x8 a_hi = wasm_i16x8_extend_high_i8x16(a);
+    __i16x8 b_lo = wasm_i16x8_extend_low_i8x16(b);
+    __i16x8 b_hi = wasm_i16x8_extend_high_i8x16(b);
     #if defined(USE_WASM_SIMD_POST_MVP)
       // [ With `i32x4.dot_i16x8_s` ]
-      // Not officially available but we can directly access as clang builtin
-      return wasm_i32x4_add(__builtin_wasm_dot_s_i32x4_i16x8(a_lo, b_lo), __builtin_wasm_dot_s_i32x4_i16x8(a_hi, b_hi));
+      return wasm_i32x4_add(wasm_i32x4_dot_i16x8(a_lo, b_lo), wasm_i32x4_dot_i16x8(a_hi, b_hi));
     #else
       // [ Without `i32x4.dot_i16x8_s` ]
       // NOTE: This version is slower than running "dot_i16x8" twice. So not used when USE_WASM_SIMD_POST_MVP is off
       __i16x8 w_lo = wasm_i16x8_mul(a_lo, b_lo);
       __i16x8 w_hi = wasm_i16x8_mul(a_hi, b_hi);
-      __i32x4 u_lo = wasm_i32x4_add(wasm_i32x4_widen_low_i16x8(w_lo), wasm_i32x4_widen_high_i16x8(w_lo));
-      __i32x4 u_hi = wasm_i32x4_add(wasm_i32x4_widen_low_i16x8(w_hi), wasm_i32x4_widen_high_i16x8(w_hi));
+      __i32x4 u_lo = wasm_i32x4_add(wasm_i32x4_extend_low_i16x8(w_lo), wasm_i32x4_extend_high_i16x8(w_lo));
+      __i32x4 u_hi = wasm_i32x4_add(wasm_i32x4_extend_low_i16x8(w_hi), wasm_i32x4_extend_high_i16x8(w_hi));
       return wasm_i32x4_add(u_lo, u_hi);
     #endif
   };
 
   [[maybe_unused]] auto dot_i16x8 = [](__i16x8 a, __i16x8 b) -> __i32x4 {
     __i16x8 c = wasm_i16x8_mul(a, b);
-    return wasm_i32x4_add(wasm_i32x4_widen_low_i16x8(c), wasm_i32x4_widen_high_i16x8(c));
+    return wasm_i32x4_add(wasm_i32x4_extend_low_i16x8(c), wasm_i32x4_extend_high_i16x8(c));
   };
 
   //
   // Horizontal sum
   //
   [[maybe_unused]] auto hadd = [&](__i32x4 x0, __i32x4 x1) -> __i32x4 {
-    return wasm_i32x4_add(wasm_v32x4_shuffle(x0, x1, 0, 2, 4, 6), wasm_v32x4_shuffle(x0, x1, 1, 3, 5, 7));
+    return wasm_i32x4_add(wasm_i32x4_shuffle(x0, x1, 0, 2, 4, 6), wasm_i32x4_shuffle(x0, x1, 1, 3, 5, 7));
   };
 
   [[maybe_unused]] auto haddx4 = [&](__i32x4 x0, __i32x4 x1, __i32x4 x2, __i32x4 x3) -> __i32x4 {
