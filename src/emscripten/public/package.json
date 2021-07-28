@@ -1,13 +1,10 @@
 {
   "name": "stockfish-nnue.wasm",
-  "version": "0.0.2",
-  "description": "Stockfish with NNUE evaluation by WASM SIMD backend",
+  "version": "1.0.0-alpha.0+237ed1ef-2.0.26",
+  "description": "WebAssembly port of Stockfish with NNUE support, optimized via WASM SIMD",
   "author": "Hiroshi Ogawa",
   "license": "GPL-3.0",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/hi-ogawa/Stockfish"
-  },
+  "homepage": "https://github.com/hi-ogawa/Stockfish",
   "files": [
     "AUTHORS",
     "Copying.txt",

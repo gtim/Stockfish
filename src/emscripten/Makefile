@@ -4,6 +4,7 @@ CXX = em++
 comp = clang
 arch = wasm
 bits = 64
+PYTHON = python3
 
 # Build options
 wasm_simd = no
@@ -48,9 +49,15 @@ endif
 EXTRACXXFLAGS += -DUSE_POPCNT $(EM_CXXFLAGS)
 EXTRALDFLAGS += $(EM_LDFLAGS)
 
+EM_ARTIFACTS += \
+	stockfish.js stockfish.wasm stockfish.worker.js \
+	emscripten/embedded_nnue.cpp \
+	emscripten/public/stockfish.js emscripten/public/stockfish.wasm emscripten/public/stockfish.worker.js \
+	emscripten/public/AUTHORS emscripten/public/Copying.txt
+
 emscripten/embedded_nnue.cpp: net
 	@echo "-- Generate embedded_nnue.cpp --"
-	python emscripten/misc/embedded_nnue.py $(nnuenet) > emscripten/embedded_nnue.cpp
+	$(PYTHON) emscripten/misc/embedded_nnue.py $(nnuenet) > emscripten/embedded_nnue.cpp
 
 emscripten_copy_files:
 	cp -f ../AUTHORS ../Copying.txt emscripten/public
@@ -58,3 +65,6 @@ emscripten_copy_files:
 	cat stockfish.worker.js emscripten/worker-postamble.js > emscripten/public/stockfish.worker.js
 
 emscripten_build: build emscripten_copy_files
+
+emscripten_clean: clean
+	@rm -f $(EM_ARTIFACTS)

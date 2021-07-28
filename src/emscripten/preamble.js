@@ -4,7 +4,8 @@
 Module["postCustomMessage"] = (data) => {
   // TODO: Acutally want to post only to main worker
   for (let worker of PThread.runningWorkers) {
-    worker.postMessage({ 'cmd': 'custom', 'userData': data });
+    // prettier-ignore
+    worker.postMessage({ "cmd": "custom", "userData": data });
   }
 };
 
@@ -17,14 +18,20 @@ class Queue {
     this.list = [];
   }
   async get() {
-    if (this.list.length > 0) { return this.list.shift(); }
-    return await new Promise(resolve => this.getter = resolve);
+    if (this.list.length > 0) {
+      return this.list.shift();
+    }
+    return await new Promise((resolve) => (this.getter = resolve));
   }
   put(x) {
-    if (this.getter) { this.getter(x); this.getter = null; return; }
+    if (this.getter) {
+      this.getter(x);
+      this.getter = null;
+      return;
+    }
     this.list.push(x);
   }
-};
+}
 
 //
 // TODO: This is used only by main worker
@@ -50,11 +57,16 @@ Module["addMessageListener"] = (listener) => {
 
 Module["removeMessageListener"] = (listener) => {
   const i = listeners.indexOf(listener);
-  if (i >= 0) { listeners.splice(i, 1); }
+  if (i >= 0) {
+    listeners.splice(i, 1);
+  }
 };
 
 Module["print"] = Module["printErr"] = (data) => {
-  if (listeners.length === 0) { console.log(data); return; }
+  if (listeners.length === 0) {
+    console.log(data);
+    return;
+  }
   for (let listener of listeners) {
     listener(data);
   }

@@ -1,36 +1,86 @@
-Build
+## Prerequisites
 
 ```
-## Enable emscripten tools
+# Enable emscripten tools
 $ source <path-to-emsdk-repo>/emsdk_env.sh
 
+# Set working directory to src/emscripten
+$ cd src/emscripten
+
+# (Optional)
+$ npm install
+```
+
 ## Build
-$ make -C src emscripten_build ARCH=wasm wasm_simd_post_mvp=yes
-```
-
-Run
 
 ```
-## Run on NodeJS
-$ /usr/bin/node -e 'console.log(`node: ${process.version}\nv8: ${process.versions.v8}`)'
-node: v15.8.0
-v8: 8.6.395.17-node.23
-
-$ /usr/bin/node --experimental-wasm-{simd,threads} --wasm-simd-post-mvp src/emscripten/public/uci.js
-
-## Run on Browser
-$ python src/emscripten/misc/server.py --d src/emscripten/public # open http://localhost:8080
+$ make -C .. emscripten_build ARCH=wasm wasm_simd_post_mvp=yes
 ```
 
-Deploy to Vercel
+## Run
+
+- Node
 
 ```
-$ yarn global add vercel
-$ $(yarn global bin)/vercel deploy src/emscripten/public --prod
+# Check node version
+$ node -e 'console.log(`node: ${process.version}\nv8: ${process.versions.v8}`)'
+node: v16.5.0
+v8: 9.1.269.38-node.20
+
+# UCI console
+$ node public/uci.js
 ```
 
-Publish npm package
+- Browser
 
 ```
-$ npm publish --cwd src/emscripten/public
+# Start server
+$ npm run serve # see http://localhost:5000
+
+# Run UCI command inside of headless browser
+$ node public/uci-puppeteer.js bench # not interactive
+```
+
+## Build/Run in Docker
+
+```
+# Build
+$ DOCKER_USER=$(id -u):$(id -g) docker-compose run emscripten bash
+> make -C .. emscripten_build ARCH=wasm wasm_simd_post_mvp=yes
+
+# Run Node
+$ docker-compose run node bash
+> node public/uci.js
+
+# Run headless browser
+$ docker-compose run browser bash
+> node public/uci-puppeteer.js bench
+```
+
+## Testing
+
+Cf. `.github/workflows/ci.yml`
+
+```
+$ UCI_EXE="node public/uci.js"           bash tests/bench-nps.sh
+$ UCI_EXE="node public/uci.js"           bash tests/bench-signature.sh
+$ UCI_EXE="node public/uci.js"           bash tests/stress.sh
+
+$ UCI_EXE="node public/uci-puppeteer.js" bash tests/bench-nps.sh
+$ UCI_EXE="node public/uci-puppeteer.js" bash tests/bench-signature.sh
+$ UCI_EXE="node public/uci-puppeteer.js" bash tests/stress.sh
+```
+
+## Misc
+
+- Publish npm package
+
+```
+$ npm publish --cwd public
+```
+
+- Deploy to Vercel
+
+```
+$ npm run deploy
 ```

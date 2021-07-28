@@ -5,3 +5,4 @@ public/stockfish.wasm
 public/stockfish.worker.js
 public/AUTHORS
 public/Copying.txt
+node_modules

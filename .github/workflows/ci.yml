@@ -1,61 +1,69 @@
 name: CI
 on: [push]
 jobs:
-  benchmark:
+  lint:
     runs-on: ubuntu-20.04
+    defaults:
+      run:
+        working-directory: src/emscripten
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-      - uses: mymindstorm/setup-emsdk@v8
-        with:
-          version: 2.0.26
-          actions-cache-folder: 'emsdk-cache'
-
-      - name: Build
-        run: make -C src emscripten_build ARCH=wasm wasm_simd_post_mvp=yes
-
-      - name: Install NodeJS
-        uses: actions/setup-node@v2
-        with:
-          node-version: 16
-
-      - name: Print NodeJS/V8 versions
-        run: "node -e 'console.log(`node: ${process.version}\nv8: ${process.versions.v8}`)'"
-
-      - name: Benchmark (classical)
-        run: >
-          node --experimental-wasm-{simd,threads} src/emscripten/public/uci.js
-          bench 16 1 25 current depth classical
-
-      - name: Benchmark (NNUE)
-        run: >
-          node --experimental-wasm-{simd,threads} src/emscripten/public/uci.js
-          bench 16 1 25 current depth NNUE
+      - run: npm install prettier
+      - run: npm run format:check
+      - run: npm run shellcheck
 
   test:
     runs-on: ubuntu-20.04
+    defaults:
+      run:
+        working-directory: src/emscripten
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-      - uses: mymindstorm/setup-emsdk@v8
         with:
-          version: 2.0.26
-          actions-cache-folder: 'emsdk-cache'
+          fetch-depth: 0
 
-      - name: Build
-        run: make -C src emscripten_build ARCH=wasm wasm_simd_post_mvp=yes
+      - run: npm install serve
 
-      - name: Install NodeJS
-        uses: actions/setup-node@v2
-        with:
-          node-version: 16
+      - name: Extract bench signature from git log
+        run: echo "sign_ref=$(bash misc/git-log-bench-signature.sh)" >> $GITHUB_ENV
 
-      - name: Print NodeJS/V8 versions
-        run: "node -e 'console.log(`node: ${process.version}\nv8: ${process.versions.v8}`)'"
+      - name: Pull docker images
+        run: docker-compose pull
 
-      - name: Test
+      - name: Build Stockfish
         run: >
-          for (( i=0; i < 1000; i++ )); do
-            echo "--- ${i} ---"
-            node --experimental-wasm-{simd,threads} src/emscripten/public/uci.js bench 128 2 2 current depth NNUE || exit 1
-          done
+          DOCKER_USER=$(id -u):$(id -g) docker-compose run emscripten
+          make -C .. emscripten_build ARCH=wasm wasm_simd_post_mvp=yes
+
+      - name: Test bench signature (Node)
+        run: >
+          docker-compose run -e uci_exe="node public/uci.js" -e sign_ref=${{ env.sign_ref }} node
+          bash tests/bench-signature.sh
+
+      - name: Test bench NPS (Node)
+        run: >
+          docker-compose run -e uci_exe="node public/uci.js" node
+          bash tests/bench-nps.sh
+
+      - name: Run server for headless testing
+        run: npm run serve & sleep 3
+
+      - name: Test bench signature (Browser)
+        run: >
+          docker-compose run -e uci_exe="node public/uci-puppeteer.js" -e sign_ref=${{ env.sign_ref }} browser
+          bash tests/bench-signature.sh
+
+      - name: Test bench NPS (Browser)
+        run: >
+          docker-compose run -e uci_exe="node public/uci-puppeteer.js" -e nps_target=250000 browser
+          bash tests/bench-nps.sh
+
+      - name: Test stress (Node)
+        run: >
+          docker-compose run -e uci_exe="node public/uci.js" -e n=30 node
+          bash tests/stress.sh
+
+      - name: Test stress (Browser)
+        run: >
+          docker-compose run -e uci_exe="node public/uci-puppeteer.js" -e n=15 browser
+          bash tests/stress.sh
