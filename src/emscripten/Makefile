@@ -10,9 +10,9 @@ wasm_simd = no
 wasm_simd_post_mvp = no
 minify_js = yes
 assertion = no
+embedded_nnue = yes
 
 VPATH := $(VPATH):emscripten
-SRCS += emscripten/embedded_nnue.cpp
 EM_CXXFLAGS +=
 EM_LDFLAGS += \
 	--pre-js emscripten/preamble.js \
@@ -22,7 +22,8 @@ EM_LDFLAGS += \
 	-s USE_PTHREADS=1 \
 	-s PROXY_TO_PTHREAD=1 \
 	-s ALLOW_MEMORY_GROWTH=1 -s INITIAL_MEMORY=$$((1 << 27)) -s MAXIMUM_MEMORY=$$((1 << 31)) \
-	-s FILESYSTEM=0 \
+	-s FILESYSTEM=1 \
+	-s EXTRA_EXPORTED_RUNTIME_METHODS=['FS'] \
 	-s ALLOW_UNIMPLEMENTED_SYSCALLS
 
 ifeq ($(minify_js),yes)
@@ -45,12 +46,20 @@ else ifeq ($(wasm_simd),yes)
 	SRCS += emscripten/wasm_simd.cpp
 endif
 
+ifeq ($(embedded_nnue),yes)
+	SRCS += emscripten/embedded_nnue.cpp
+else
+	EM_CXXFLAGS += -DNNUE_EMBEDDING_OFF
+endif
+
 EXTRACXXFLAGS += -DUSE_POPCNT $(EM_CXXFLAGS)
 EXTRALDFLAGS += $(EM_LDFLAGS)
 
+ifeq ($(embedded_nnue),yes)
 emscripten/embedded_nnue.cpp: net
 	@echo "-- Generate embedded_nnue.cpp --"
 	python emscripten/misc/embedded_nnue.py $(nnuenet) > emscripten/embedded_nnue.cpp
+endif
 
 emscripten_copy_files:
 	cp -f ../AUTHORS ../Copying.txt emscripten/public

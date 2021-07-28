@@ -63,3 +63,23 @@ Module["print"] = Module["printErr"] = (data) => {
 Module["terminate"] = () => {
   PThread.terminateAllThreads();
 };
+
+//
+// Small wrapper to load NNUE weights from buffer (e.g. ArrayBuffer or NodeJS's Buffer)
+//
+// Usage in node:
+//   $ node --experimental-wasm-{simd,threads} --experimental-repl-await
+//   let stockfish = await require("./src/emscripten/public/stockfish.js")();
+//   let data = await fs.promises.readFile("src/nn-76a8a7ffb820.nnue");
+//   let cleanup = stockfish.setEvalFile(data, "/nn-76a8a7ffb820.nnue");
+//   stockfish.postMessage("eval");
+//   cleanup();
+//
+Module["setEvalFile"] = (buffer, filename) => {
+  const file = FS.open(filename, "w");
+  FS.write(file, buffer, 0, buffer.length);
+  Module["postMessage"](`setoption name EvalFile value ${filename}`);
+  FS.close(file);
+  // Returns callback to cleanup resource after it's verified that data are loaded correctly e.g. by "eval" command.
+  return () => FS.unlink(filename);
+};

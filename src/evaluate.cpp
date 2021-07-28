@@ -84,7 +84,8 @@ namespace Eval {
     string eval_file = string(Options["EvalFile"]);
 
     #ifdef __EMSCRIPTEN__
-    vector<string> dirs = { "<internal>" };
+
+    vector<string> dirs = { "<internal>", "" };
 
     #else
 
