@@ -6,8 +6,7 @@ arch = wasm
 bits = 64
 
 # Build options
-wasm_simd = no
-wasm_simd_post_mvp = no
+wasm_simd = yes
 minify_js = yes
 assertion = no
 
@@ -37,10 +36,7 @@ else
 	EM_LDFLAGS += -s ASSERTIONS=0
 endif
 
-ifeq ($(wasm_simd_post_mvp),yes)
-	EM_CXXFLAGS += -DUSE_WASM_SIMD -DUSE_WASM_SIMD_POST_MVP -msimd128
-	SRCS += emscripten/wasm_simd.cpp
-else ifeq ($(wasm_simd),yes)
+ifeq ($(wasm_simd),yes)
 	EM_CXXFLAGS += -DUSE_WASM_SIMD -msimd128
 	SRCS += emscripten/wasm_simd.cpp
 endif
@@ -67,8 +63,7 @@ emscripten/embedded_nnue.cpp: net
 	node emscripten/misc/embedded_nnue.js < $(nnuenet) > emscripten/embedded_nnue.cpp
 
 emscripten_copy_files:
-	cp -f ../AUTHORS ../Copying.txt emscripten/public
-	cp -f stockfish.js stockfish.wasm emscripten/public
+	cp -f ../AUTHORS ../Copying.txt stockfish.js stockfish.wasm emscripten/public
 	cat stockfish.worker.js emscripten/worker-postamble.js > emscripten/public/stockfish.worker.js
 
 emscripten_build: build emscripten_copy_files

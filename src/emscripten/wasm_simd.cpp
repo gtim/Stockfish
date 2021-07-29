@@ -15,18 +15,7 @@ void affine(const int8_t A[m][n_stride], const uint8_t x[n], const int32_t b[m],
     __i16x8 a_hi = wasm_i16x8_extend_high_i8x16(a);
     __i16x8 b_lo = wasm_i16x8_extend_low_i8x16(b);
     __i16x8 b_hi = wasm_i16x8_extend_high_i8x16(b);
-    #if defined(USE_WASM_SIMD_POST_MVP)
-      // [ With `i32x4.dot_i16x8_s` ]
-      return wasm_i32x4_add(wasm_i32x4_dot_i16x8(a_lo, b_lo), wasm_i32x4_dot_i16x8(a_hi, b_hi));
-    #else
-      // [ Without `i32x4.dot_i16x8_s` ]
-      // NOTE: This version is slower than running "dot_i16x8" twice. So not used when USE_WASM_SIMD_POST_MVP is off
-      __i16x8 w_lo = wasm_i16x8_mul(a_lo, b_lo);
-      __i16x8 w_hi = wasm_i16x8_mul(a_hi, b_hi);
-      __i32x4 u_lo = wasm_i32x4_add(wasm_i32x4_extend_low_i16x8(w_lo), wasm_i32x4_extend_high_i16x8(w_lo));
-      __i32x4 u_hi = wasm_i32x4_add(wasm_i32x4_extend_low_i16x8(w_hi), wasm_i32x4_extend_high_i16x8(w_hi));
-      return wasm_i32x4_add(u_lo, u_hi);
-    #endif
+    return wasm_i32x4_add(wasm_i32x4_dot_i16x8(a_lo, b_lo), wasm_i32x4_dot_i16x8(a_hi, b_hi));
   };
 
   [[maybe_unused]] auto dot_i16x8 = [](__i16x8 a, __i16x8 b) -> __i32x4 {
@@ -50,15 +39,9 @@ void affine(const int8_t A[m][n_stride], const uint8_t x[n], const int32_t b[m],
   //
   [[maybe_unused]] auto dot = [&](const int8_t* a, const uint8_t* x, const int32_t* b, int32_t* out) {
     __i32x4 z = wasm_i32x4_splat(0);
-    #if defined(USE_WASM_SIMD_POST_MVP)
-      for (int j = 0; j < n; j += 16) {
-        z = wasm_i32x4_add(z, dot_i8x16(wasm_v128_load(&a[j]), wasm_v128_load(&x[j])));
-      }
-    #else
-      for (int j = 0; j < n; j += 8) {
-        z = wasm_i32x4_add(z, dot_i16x8(wasm_i16x8_load8x8(&a[j]), wasm_i16x8_load8x8(&x[j])));
-      }
-    #endif
+    for (int j = 0; j < n; j += 16) {
+      z = wasm_i32x4_add(z, dot_i8x16(wasm_v128_load(&a[j]), wasm_v128_load(&x[j])));
+    }
     out[0] = b[0] + z[0] + z[1] + z[2] + z[3];
   };
 
@@ -70,23 +53,13 @@ void affine(const int8_t A[m][n_stride], const uint8_t x[n], const int32_t b[m],
     __i32x4 z1 = wasm_i32x4_splat(0);
     __i32x4 z2 = wasm_i32x4_splat(0);
     __i32x4 z3 = wasm_i32x4_splat(0);
-    #if defined(USE_WASM_SIMD_POST_MVP)
-      for (int j = 0; j < n; j += 16) {
-        __i8x16 xv = wasm_v128_load(&x[j]);
-        z0 = wasm_i32x4_add(z0, dot_i8x16(wasm_v128_load(&a[j + 0 * n_stride]), xv));
-        z1 = wasm_i32x4_add(z1, dot_i8x16(wasm_v128_load(&a[j + 1 * n_stride]), xv));
-        z2 = wasm_i32x4_add(z2, dot_i8x16(wasm_v128_load(&a[j + 2 * n_stride]), xv));
-        z3 = wasm_i32x4_add(z3, dot_i8x16(wasm_v128_load(&a[j + 3 * n_stride]), xv));
-      }
-    #else
-      for (int j = 0; j < n; j += 8) {
-        __i16x8 xv = wasm_i16x8_load8x8(&x[j]);
-        z0 = wasm_i32x4_add(z0, dot_i16x8(wasm_i16x8_load8x8(&a[j + 0 * n_stride]), xv));
-        z1 = wasm_i32x4_add(z1, dot_i16x8(wasm_i16x8_load8x8(&a[j + 1 * n_stride]), xv));
-        z2 = wasm_i32x4_add(z2, dot_i16x8(wasm_i16x8_load8x8(&a[j + 2 * n_stride]), xv));
-        z3 = wasm_i32x4_add(z3, dot_i16x8(wasm_i16x8_load8x8(&a[j + 3 * n_stride]), xv));
-      }
-    #endif
+    for (int j = 0; j < n; j += 16) {
+      __i8x16 xv = wasm_v128_load(&x[j]);
+      z0 = wasm_i32x4_add(z0, dot_i8x16(wasm_v128_load(&a[j + 0 * n_stride]), xv));
+      z1 = wasm_i32x4_add(z1, dot_i8x16(wasm_v128_load(&a[j + 1 * n_stride]), xv));
+      z2 = wasm_i32x4_add(z2, dot_i8x16(wasm_v128_load(&a[j + 2 * n_stride]), xv));
+      z3 = wasm_i32x4_add(z3, dot_i8x16(wasm_v128_load(&a[j + 3 * n_stride]), xv));
+    }
     __i32x4 z = wasm_i32x4_add(wasm_v128_load(&b[0]), haddx4(z0, z1, z2, z3));
     wasm_v128_store(&out[0], z);
   };

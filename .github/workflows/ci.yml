@@ -17,6 +17,9 @@ jobs:
     defaults:
       run:
         working-directory: src/emscripten
+    strategy:
+      matrix:
+        wasm_simd: ['yes', 'no']
     steps:
       - uses: actions/checkout@v2
         with:
@@ -33,7 +36,7 @@ jobs:
       - name: Build Stockfish
         run: >
           DOCKER_USER=$(id -u):$(id -g) docker-compose run emscripten
-          make -C .. emscripten_build ARCH=wasm wasm_simd_post_mvp=yes
+          make -C .. emscripten_build ARCH=wasm wasm_simd=${{ matrix.wasm_simd }}
 
       - name: Test bench signature (Node)
         run: >
@@ -41,6 +44,7 @@ jobs:
           bash tests/bench-signature.sh
 
       - name: Test bench NPS (Node)
+        if: ${{ matrix.wasm_simd == 'yes' }}
         run: >
           docker-compose run -e uci_exe="node public/uci.js" node
           bash tests/bench-nps.sh
@@ -54,16 +58,19 @@ jobs:
           bash tests/bench-signature.sh
 
       - name: Test bench NPS (Browser)
+        if: ${{ matrix.wasm_simd == 'yes' }}
         run: >
           docker-compose run -e uci_exe="node public/uci-puppeteer.js" -e nps_target=250000 browser
           bash tests/bench-nps.sh
 
       - name: Test stress (Node)
+        if: ${{ matrix.wasm_simd == 'yes' }}
         run: >
           docker-compose run -e uci_exe="node public/uci.js" -e n=30 node
           bash tests/stress.sh
 
       - name: Test stress (Browser)
+        if: ${{ matrix.wasm_simd == 'yes' }}
         run: >
           docker-compose run -e uci_exe="node public/uci-puppeteer.js" -e n=15 browser
           bash tests/stress.sh

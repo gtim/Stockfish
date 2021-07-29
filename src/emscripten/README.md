@@ -14,7 +14,7 @@ $ npm install
 ## Build
 
 ```
-$ make -C .. emscripten_build ARCH=wasm wasm_simd_post_mvp=yes # equivalent to `npm run build`
+$ make -C .. emscripten_build ARCH=wasm # or equivalently `npm run build`
 ```
 
 ## Run
@@ -47,7 +47,7 @@ $ node public/uci-puppeteer.js bench # not interactive
 ```
 # Build
 $ DOCKER_USER=$(id -u):$(id -g) docker-compose run emscripten bash
-> make -C .. emscripten_build ARCH=wasm wasm_simd_post_mvp=yes
+> make -C .. emscripten_build ARCH=wasm
 
 # Run Node
 $ docker-compose run node bash

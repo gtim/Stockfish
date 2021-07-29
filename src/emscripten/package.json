@@ -1,9 +1,11 @@
 {
   "description": "This package.json is only for development. Actual stockfish-nnue.wasm package is under src/emscripten/public",
   "scripts": {
-    "build": "make -C .. emscripten_build ARCH=wasm wasm_simd_post_mvp=yes",
+    "build": "make -C .. emscripten_build ARCH=wasm",
     "clean": "make -C .. emscripten_clean ARCH=wasm",
     "build:refresh": "npm run clean && npm run build",
+    "uci": "node public/uci.js",
+    "uci:browser": "node public/uci-puppeteer.js",
     "serve": "serve public --no-compression",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
