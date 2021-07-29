@@ -7,14 +7,14 @@ $ source <path-to-emsdk-repo>/emsdk_env.sh
 # Set working directory to src/emscripten
 $ cd src/emscripten
 
-# (Optional)
+# Optional (headless testing, vercel cli, etc...)
 $ npm install
 ```
 
 ## Build
 
 ```
-$ npm run build # equivalent to `make -C .. emscripten_build ARCH=wasm wasm_simd_post_mvp=yes`
+$ make -C .. emscripten_build ARCH=wasm wasm_simd_post_mvp=yes # equivalent to `npm run build`
 ```
 
 ## Run
@@ -34,10 +34,11 @@ $ node public/uci.js
 - Browser
 
 ```
-# Start server
-$ npm run serve # see http://localhost:5000
+# Start server for http://localhost:5000/test-puppeteer.html
+$ npm run serve
 
 # Run UCI command inside of headless browser
+$ npm install puppeteer
 $ node public/uci-puppeteer.js bench # not interactive
 ```
 

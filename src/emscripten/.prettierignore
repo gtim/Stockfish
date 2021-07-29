@@ -1,5 +1,5 @@
+node_modules
 package-lock.json
-public/*.js
-public/*.html
-!public/uci.js
-!public/uci-puppeteer.js
+public/stockfish.js
+public/stockfish.wasm
+public/stockfish.worker.js
