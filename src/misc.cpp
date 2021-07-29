@@ -65,9 +65,28 @@ namespace Stockfish {
 
 namespace {
 
+#if defined(__EMSCRIPTEN__) && defined(EM_COMMIT)
+
+#define MACRO_STRINGIFY_INTERNAL(X) #X
+#define MACRO_STRINGIFY(X) MACRO_STRINGIFY_INTERNAL(X)
+
+const string Version =
+  "["
+  "commit: "      MACRO_STRINGIFY(EM_COMMIT) ", "
+  "upstream: "    MACRO_STRINGIFY(EM_UPSTREAM) ", "
+  "emscripten: "  MACRO_STRINGIFY(EM_EMSCRIPTEN)
+  "]";
+
+#undef MACRO_STRINGIFY
+#undef MACRO_STRINGIFY_INTERNAL
+
+#else
+
 /// Version number. If Version is left empty, then compile date in the format
 /// DD-MM-YY and show in engine_info.
 const string Version = "";
+
+#endif
 
 /// Our fancy logging facility. The trick here is to replace cin.rdbuf() and
 /// cout.rdbuf() with two Tie objects that tie cin and cout to a file stream. We

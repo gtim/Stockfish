@@ -14,7 +14,7 @@ $ npm install
 ## Build
 
 ```
-$ make -C .. emscripten_build ARCH=wasm wasm_simd_post_mvp=yes
+$ npm run build # equivalent to `make -C .. emscripten_build ARCH=wasm wasm_simd_post_mvp=yes`
 ```
 
 ## Run

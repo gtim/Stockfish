@@ -45,7 +45,15 @@ else ifeq ($(wasm_simd),yes)
 	SRCS += emscripten/wasm_simd.cpp
 endif
 
-EXTRACXXFLAGS += -DUSE_POPCNT $(EM_CXXFLAGS)
+EM_COMMIT = $(shell git rev-parse --short HEAD)
+EM_UPSTREAM = $(shell git rev-parse --short $$(git merge-base HEAD upstream/master))
+EM_EMSCRIPTEN = $(shell emsdk list | grep INSTALLED | head -n 1 | awk '{ print $$1 }')
+
+EXTRACXXFLAGS += \
+	-DUSE_POPCNT $(EM_CXXFLAGS) \
+	-DEM_COMMIT=$(EM_COMMIT) \
+	-DEM_UPSTREAM=$(EM_UPSTREAM) \
+	-DEM_EMSCRIPTEN=$(EM_EMSCRIPTEN)
 EXTRALDFLAGS += $(EM_LDFLAGS)
 
 EM_ARTIFACTS += \
