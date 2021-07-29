@@ -76,11 +76,6 @@ $ UCI_EXE="node public/uci-puppeteer.js" bash tests/stress.sh
 - Publish npm package
 
 ```
-$ npm publish --cwd public
-```
-
-- Deploy to Vercel
-
-```
-$ npm run deploy
+$ npm run build:refresh
+$ npm publish ./public
 ```

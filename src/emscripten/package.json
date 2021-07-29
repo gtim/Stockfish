@@ -3,11 +3,11 @@
   "scripts": {
     "build": "make -C .. emscripten_build ARCH=wasm wasm_simd_post_mvp=yes",
     "clean": "make -C .. emscripten_clean ARCH=wasm",
+    "build:refresh": "npm run clean && npm run build",
     "serve": "serve public --no-compression",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "shellcheck": "docker run --rm -v \"$PWD:/mnt\" koalaman/shellcheck:stable **/*.sh",
-    "deploy": "vercel deploy public --prod"
+    "shellcheck": "docker run --rm -v \"$PWD:/mnt\" koalaman/shellcheck:stable **/*.sh"
   },
   "peerDependencies": {
     "puppeteer": "^10.0.0"
