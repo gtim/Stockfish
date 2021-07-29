@@ -4,7 +4,6 @@ CXX = em++
 comp = clang
 arch = wasm
 bits = 64
-PYTHON = python3
 
 # Build options
 wasm_simd = no
@@ -57,7 +56,7 @@ EM_ARTIFACTS += \
 
 emscripten/embedded_nnue.cpp: net
 	@echo "-- Generate embedded_nnue.cpp --"
-	$(PYTHON) emscripten/misc/embedded_nnue.py $(nnuenet) > emscripten/embedded_nnue.cpp
+	node emscripten/misc/embedded_nnue.js < $(nnuenet) > emscripten/embedded_nnue.cpp
 
 emscripten_copy_files:
 	cp -f ../AUTHORS ../Copying.txt emscripten/public

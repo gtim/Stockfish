@@ -1,6 +1,8 @@
 {
   "description": "This package.json is only for development. Actual stockfish-nnue.wasm package is under src/emscripten/public",
   "scripts": {
+    "build": "make -C .. emscripten_build ARCH=wasm wasm_simd_post_mvp=yes",
+    "clean": "make -C .. emscripten_clean ARCH=wasm",
     "serve": "serve public --no-compression",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
