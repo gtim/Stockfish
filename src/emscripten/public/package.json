@@ -13,6 +13,7 @@
     "Copying.txt",
     "stockfish.js",
     "stockfish.wasm",
-    "stockfish.worker.js"
+    "stockfish.worker.js",
+    "uci.js"
   ]
 }
