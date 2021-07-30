@@ -47,7 +47,7 @@ jobs:
           bash tests/bench-nps.sh
 
       - name: Run server for headless testing
-        run: npm install serve && npm run serve & sleep 3
+        run: npm install serve && (npm run serve & sleep 5)
 
       - name: Test bench signature (Browser)
         run: >
