@@ -7,11 +7,11 @@ bits = 64
 
 # Build options
 wasm_simd = yes
+embedded_nnue = yes
 minify_js = yes
 assertion = no
 
 VPATH := $(VPATH):emscripten
-SRCS += emscripten/embedded_nnue.cpp
 EM_CXXFLAGS +=
 EM_LDFLAGS += \
 	--pre-js emscripten/preamble.js \
@@ -21,7 +21,7 @@ EM_LDFLAGS += \
 	-s USE_PTHREADS=1 \
 	-s PROXY_TO_PTHREAD=1 \
 	-s ALLOW_MEMORY_GROWTH=1 -s INITIAL_MEMORY=$$((1 << 27)) -s MAXIMUM_MEMORY=$$((1 << 31)) \
-	-s FILESYSTEM=0 \
+	-s FILESYSTEM=1 -s EXTRA_EXPORTED_RUNTIME_METHODS=["FS"] \
 	-s ALLOW_UNIMPLEMENTED_SYSCALLS
 
 ifeq ($(minify_js),yes)
@@ -41,6 +41,12 @@ ifeq ($(wasm_simd),yes)
 	SRCS += emscripten/wasm_simd.cpp
 endif
 
+ifeq ($(embedded_nnue),yes)
+	SRCS += emscripten/embedded_nnue.cpp
+else
+	EM_CXXFLAGS += -DNNUE_EMBEDDING_OFF
+endif
+
 EM_COMMIT = $(shell git rev-parse --short HEAD)
 EM_UPSTREAM = $(shell git rev-parse --short $$(git merge-base HEAD upstream/master))
 EM_EMSCRIPTEN = $(shell emsdk list | grep INSTALLED | head -n 1 | awk '{ print $$1 }')
@@ -58,9 +64,11 @@ EM_ARTIFACTS += \
 	emscripten/public/stockfish.js emscripten/public/stockfish.wasm emscripten/public/stockfish.worker.js \
 	emscripten/public/AUTHORS emscripten/public/Copying.txt
 
+ifeq ($(embedded_nnue),yes)
 emscripten/embedded_nnue.cpp: net
 	@echo "-- Generate embedded_nnue.cpp --"
 	node emscripten/misc/embedded_nnue.js < $(nnuenet) > emscripten/embedded_nnue.cpp
+endif
 
 emscripten_copy_files:
 	cp -f ../AUTHORS ../Copying.txt stockfish.js stockfish.wasm emscripten/public

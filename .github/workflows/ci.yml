@@ -25,13 +25,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - run: npm install serve
+      - run: docker-compose pull
 
       - name: Extract bench signature from git log
         run: echo "sign_ref=$(bash misc/git-log-bench-signature.sh)" >> $GITHUB_ENV
-
-      - name: Pull docker images
-        run: docker-compose pull
 
       - name: Build Stockfish
         run: >
@@ -50,7 +47,7 @@ jobs:
           bash tests/bench-nps.sh
 
       - name: Run server for headless testing
-        run: npm run serve & sleep 3
+        run: npm install serve && npm run serve & sleep 3
 
       - name: Test bench signature (Browser)
         run: >
@@ -74,3 +71,35 @@ jobs:
         run: >
           docker-compose run -e uci_exe="node public/uci-puppeteer.js" -e n=15 browser
           bash tests/stress.sh
+
+  test-no-embedded-nnue:
+    runs-on: ubuntu-20.04
+    defaults:
+      run:
+        working-directory: src/emscripten
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - run: docker-compose pull emscripten node
+
+      - name: Extract bench signature from git log
+        run: echo "sign_ref=$(bash misc/git-log-bench-signature.sh)" >> $GITHUB_ENV
+
+      - name: Extract default net name
+        run: echo "default_net=$(make -C .. net | grep "Default net" | awk '{ print $NF }')" >> $GITHUB_ENV
+
+      - name: Build Stockfish
+        run: >
+          DOCKER_USER=$(id -u):$(id -g) docker-compose run emscripten
+          make -C .. emscripten_build ARCH=wasm embedded_nnue=no
+
+      - name: Verify stockfish.wasm < 1MB
+        run: >
+          [ $(wc -c public/stockfish.wasm | awk '{ print $1 }') -lt 1000000 ]
+
+      - name: Test bench signature (Node)
+        run: >
+          docker-compose run -e uci_exe="node public/uci.js" -e sign_ref=${{ env.sign_ref }} -e UCI_EVAL_FILE="../${{ env.default_net }}" node
+          bash tests/bench-signature.sh
