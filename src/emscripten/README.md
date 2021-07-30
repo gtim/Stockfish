@@ -80,3 +80,20 @@ $ UCI_EXE="node public/uci-puppeteer.js" bash tests/stress.sh
 $ npm run build:all
 $ npm publish ./public
 ```
+
+## Related projects
+
+- https://github.com/hi-ogawa/stockfish-nnue-wasm-demo
+
+  - Code for https://stockfish-nnue-wasm.vercel.app
+
+- https://github.com/hi-ogawa/stockfish-nnue-wasm-match
+
+  - Simple engine match testing using Github Actions
+
+- https://github.com/niklasf/stockfish.wasm
+
+  - Many emscripten related patches are originally from niklasf's port
+
+- https://github.com/ornicar/lila
+  - Client side analysis integration code is found at [`ui/ceval`](https://github.com/ornicar/lila/blob/master/ui/ceval/src/ctrl.ts).
