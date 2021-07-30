@@ -101,5 +101,5 @@ jobs:
 
       - name: Test bench signature (Node)
         run: >
-          docker-compose run -e uci_exe="node public/uci.js" -e sign_ref=${{ env.sign_ref }} -e UCI_EVAL_FILE="../${{ env.default_net }}" node
+          docker-compose run -e uci_exe="node public/uci.js" -e sign_ref=${{ env.sign_ref }} -e UCI_NNUE_FILE="../${{ env.default_net }}" node
           bash tests/bench-signature.sh

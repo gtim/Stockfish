@@ -3,7 +3,7 @@ const fs = require("fs");
 const readline = require("readline");
 const Stockfish = require("./stockfish.js");
 
-const UCI_EVAL_FILE = process.env.UCI_EVAL_FILE;
+const UCI_NNUE_FILE = process.env.UCI_NNUE_FILE;
 
 async function runRepl(stockfish) {
   const iface = readline.createInterface({ input: process.stdin });
@@ -19,12 +19,10 @@ async function runRepl(stockfish) {
 async function main(argv) {
   const stockfish = await Stockfish();
   const FS = stockfish.FS;
-  if (UCI_EVAL_FILE) {
-    const buffer = await fs.promises.readFile(UCI_EVAL_FILE);
-    const filename = "/__UCI_EVAL_FILE__.nnue";
-    const file = FS.open(filename, "w");
-    FS.write(file, buffer, 0, buffer.length);
-    FS.close(file);
+  if (UCI_NNUE_FILE) {
+    const buffer = await fs.promises.readFile(UCI_NNUE_FILE);
+    const filename = "/__UCI_NNUE_FILE__.nnue";
+    FS.writeFile(filename, buffer);
     stockfish.postMessage(`setoption name EvalFile value ${filename}`);
   }
   if (argv.length > 0) {
