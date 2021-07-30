@@ -77,6 +77,6 @@ $ UCI_EXE="node public/uci-puppeteer.js" bash tests/stress.sh
 - Publish npm package
 
 ```
-$ npm run build:refresh
+$ npm run build:all
 $ npm publish ./public
 ```

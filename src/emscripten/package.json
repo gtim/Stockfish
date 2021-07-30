@@ -4,6 +4,8 @@
     "build": "make -C .. emscripten_build ARCH=wasm",
     "clean": "make -C .. emscripten_clean ARCH=wasm",
     "build:refresh": "npm run clean && npm run build",
+    "build:no-embedded-nnue": "npm run clean && npm run build -- embedded_nnue=no && cp -f public/stockfish.wasm public/stockfish-no-embedded-nnue.wasm",
+    "build:all": "npm run build:no-embedded-nnue && npm run build:refresh",
     "uci": "node public/uci.js",
     "uci:browser": "node public/uci-puppeteer.js",
     "serve": "serve public --no-compression",
