@@ -4,6 +4,8 @@ WebAssembly port of [Stockfish](https://github.com/official-stockfish/Stockfish)
 
 For development, see [`src/emscripten/README.md`](src/emscripten/README.md).
 
+Current default branch is `emscripten-237ed1ef-2.0.26`. See [here](https://github.com/hi-ogawa/Stockfish/wiki/Branch-policy) for the detail about the branch policy of this repository.
+
 The original `README.md` follows below.
 
 ## Overview
