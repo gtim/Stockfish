@@ -11,6 +11,7 @@
     "stockfish.js",
     "stockfish.wasm",
     "stockfish-no-embedded-nnue.wasm",
-    "stockfish.worker.js"
+    "stockfish.worker.js",
+    "uci.js"
   ]
 }
