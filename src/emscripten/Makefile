@@ -66,8 +66,7 @@ EM_ARTIFACTS += \
 
 ifeq ($(embedded_nnue),yes)
 emscripten/embedded_nnue.cpp: net
-	@echo "-- Generate embedded_nnue.cpp --"
-	node emscripten/misc/embedded_nnue.js < $(nnuenet) > emscripten/embedded_nnue.cpp
+	test $@ -nt $(nnuenet) || node emscripten/misc/embedded_nnue.js < $(nnuenet) > $@
 endif
 
 emscripten_copy_files:
