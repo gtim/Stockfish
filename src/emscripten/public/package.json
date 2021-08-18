@@ -1,6 +1,6 @@
 {
   "name": "stockfish-nnue.wasm",
-  "version": "1.0.0-alpha.1946a675",
+  "version": "1.0.0-alpha.1946a675.smolnet",
   "description": "WebAssembly port of Stockfish with NNUE support, optimized via WASM SIMD",
   "author": "Hiroshi Ogawa",
   "license": "GPL-3.0",
