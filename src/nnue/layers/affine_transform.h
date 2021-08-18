@@ -131,7 +131,6 @@ namespace Stockfish::Eval::NNUE::Layers {
 #if defined(USE_WASM_SIMD)
       {
         // Simplify variable names (y = Ax + b)
-        static_assert(InputDimensions % 16 == 0);
         constexpr int n = InputDimensions;
         constexpr int m = OutputDimensions;
         constexpr int n_stride = PaddedInputDimensions;
