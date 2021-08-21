@@ -1,13 +1,12 @@
 ## stockfish-nnue.wasm
 
-[![npm version](https://badge.fury.io/js/stockfish-nnue.wasm.svg)](https://badge.fury.io/js/stockfish-nnue.wasm)
 [![CI](https://github.com/hi-ogawa/Stockfish/actions/workflows/ci.yml/badge.svg)](https://github.com/hi-ogawa/Stockfish/actions/workflows/ci.yml)
 
 WebAssembly port of [Stockfish](https://github.com/official-stockfish/Stockfish) with NNUE support, currently used by [lichess.org](https://lichess.org/blog/YDOKRxQAACgAREB3/stockfish-13-nnue-on-lichess) for client-side analysis.
 
 For development, see [`src/emscripten/README.md`](src/emscripten/README.md).
 
-There are two separate repositories used for additinal testing:
+There are other two repositories used for additinal testing:
 
 - [stockfish-nnue-wasm-demo](https://github.com/hi-ogawa/stockfish-nnue-wasm-demo):
   frontend examples, including source code for https://stockfish-nnue-wasm.vercel.app
@@ -15,12 +14,11 @@ There are two separate repositories used for additinal testing:
 - [stockfish-nnue-wasm-match](https://github.com/hi-ogawa/stockfish-nnue-wasm-match):
   engine match testing scripts and match results
 
-Current default branch is `emscripten-237ed1ef-2.0.26`.
-See [here](https://github.com/hi-ogawa/Stockfish/wiki/Branch-policy) for the detail about the branch policy of this repository.
+The default branch of this repository changes based on upstream. See [here](https://github.com/hi-ogawa/Stockfish/wiki/Branch-policy) for the detail.
 
 ---
 
-The original `README.md` from the upstream continues from here.
+The original `README.md` from the upstream continues below.
 
 ## Overview
 
