@@ -6,7 +6,7 @@ WebAssembly port of [Stockfish](https://github.com/official-stockfish/Stockfish)
 
 For development, see [`src/emscripten/README.md`](src/emscripten/README.md).
 
-There are other two repositories used for additinal testing:
+There are other two repositories used for additional testing:
 
 - [stockfish-nnue-wasm-demo](https://github.com/hi-ogawa/stockfish-nnue-wasm-demo):
   frontend examples, including source code for https://stockfish-nnue-wasm.vercel.app
